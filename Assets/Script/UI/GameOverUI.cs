@@ -12,13 +12,13 @@ public class GameOverUI : MonoBehaviour
         gameObject.SetActive(false);
         mainMenuBtn.onClick.AddListener(() =>
         {
-
+            LoadSceneManager.Load(LoadSceneManager.Scene.MainMenuScene);
         });
         restartBtn.onClick.AddListener(() =>
         {
-
+            LoadSceneManager.Load(LoadSceneManager.Scene.GameScene);
         });
-        GameManagerUI.Instance.CallGameOverUI += GameManagerUI_CallGameOverUI;
+        GameManagerUI.Instance.OnGameOverUI += GameManagerUI_CallGameOverUI;
     }
 
     private void GameManagerUI_CallGameOverUI(object sender, System.EventArgs e)

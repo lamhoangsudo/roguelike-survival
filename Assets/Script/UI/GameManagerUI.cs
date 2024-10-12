@@ -8,11 +8,9 @@ public class GameManagerUI : MonoBehaviour
 {
     [SerializeField] private GameOverUI gameOverUI;
     [SerializeField] private GamePauseUI gamePauseUI;
-    [SerializeField] private Button pauseUI;
     public static GameManagerUI Instance;
-    public event EventHandler CallGameOverUI;
-    public event EventHandler CallGamePauseUI;
-    public event EventHandler OnClickGamePauseBtn;
+    public event EventHandler OnGameOverUI;
+    public event EventHandler OnGamePauseUI;
     public event EventHandler OnGameManagerUnPauseGame;
     private void Awake()
     {
@@ -20,14 +18,15 @@ public class GameManagerUI : MonoBehaviour
     }
     private void Start()
     {
-        pauseUI.onClick.AddListener(() =>
-        {
-            OnClickGamePauseBtn?.Invoke(this, EventArgs.Empty);
-        });
         GameManager.Instance.OnGameOver += GameManager_OnGameOver;
-        GameManager.Instance.OnGamePause += GameManager_OnGamePause;
         gamePauseUI.UnPauseGame += GamePauseUI_UnPauseGame;
         gamePauseUI.SettingGame += GamePauseUI_SettingGame;
+        gamePauseUI.OnClickGamePauseBtn += GamePauseUI_OnClickGamePauseBtn;
+    }
+
+    private void GamePauseUI_OnClickGamePauseBtn(object sender, EventArgs e)
+    {
+        OnGamePauseUI?.Invoke(this, EventArgs.Empty);
     }
 
     private void GamePauseUI_SettingGame(object sender, EventArgs e)
@@ -40,13 +39,8 @@ public class GameManagerUI : MonoBehaviour
         OnGameManagerUnPauseGame?.Invoke(this, EventArgs.Empty);
     }
 
-    private void GameManager_OnGamePause(object sender, EventArgs e)
-    {
-        CallGamePauseUI?.Invoke(this, EventArgs.Empty);
-    }
-
     private void GameManager_OnGameOver(object sender, System.EventArgs e)
     {
-        CallGameOverUI?.Invoke(this, EventArgs.Empty);
+        OnGameOverUI?.Invoke(this, EventArgs.Empty);
     }
 }

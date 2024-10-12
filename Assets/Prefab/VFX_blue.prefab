@@ -19474,7 +19474,7 @@ GameObject:
   - component: {fileID: 3220580318672070478}
   - component: {fileID: 4141503596249581934}
   m_Layer: 0
-  m_Name: Loading_free_blue
+  m_Name: VFX_blue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

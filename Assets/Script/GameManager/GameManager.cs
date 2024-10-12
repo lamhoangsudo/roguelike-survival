@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Player.OnPlayerDie += Player_OnPlayerDie;
-        GameManagerUI.Instance.OnClickGamePauseBtn += GameManagerUI_OnGamePause;
+        GameManagerUI.Instance.OnGamePauseUI += GameManagerUI_OnGamePause;
         GameManagerUI.Instance.OnGameManagerUnPauseGame += Instance_OnGameManagerUnPauseGame;
     }
 

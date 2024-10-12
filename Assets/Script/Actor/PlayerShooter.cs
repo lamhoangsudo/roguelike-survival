@@ -10,9 +10,11 @@ public class PlayerShooter : MonoBehaviour
     [SerializeField] private GameObject projectile;
     [SerializeField] private Transform offset;
     private ObjectPool<GameObject> projectilePool;
+    private HashSet<GameObject> activeProjectiles = new HashSet<GameObject>();
+
     private void Awake()
     {
-        projectilePool = new(
+        projectilePool = new ObjectPool<GameObject>(
             createFunc: () => Instantiate(projectile, offset.position, offset.rotation),
             actionOnGet: (projectile) => projectile.SetActive(true),
             actionOnRelease: (projectile) => projectile.SetActive(false),
@@ -20,10 +22,17 @@ public class PlayerShooter : MonoBehaviour
             collectionCheck: true,
             defaultCapacity: 5,
             maxSize: 10
-            );
+        );
     }
+
     private void Start()
     {
+        // Unsubscribe to avoid multiple subscriptions
+        //GameInputSystem.instance.OnPlayerShooter -= GameInputSystem_OnPlayerShooter;
+        //ProjectileHit.OnAnyProjectileHit -= ProjectileHit_OnAnyProjectileHit;
+        //Projectile.OnAnyProjectileRunOutExistenceTime -= Projectile_OnAnyProjectileRunOutExistenceTime;
+
+        // Subscribe to the events
         GameInputSystem.instance.OnPlayerShooter += GameInputSystem_OnPlayerShooter;
         ProjectileHit.OnAnyProjectileHit += ProjectileHit_OnAnyProjectileHit;
         Projectile.OnAnyProjectileRunOutExistenceTime += Projectile_OnAnyProjectileRunOutExistenceTime;
@@ -31,17 +40,27 @@ public class PlayerShooter : MonoBehaviour
 
     private void Projectile_OnAnyProjectileRunOutExistenceTime(object sender, GameObject projectile)
     {
-        projectilePool.Release(projectile);
+        if (activeProjectiles.Contains(projectile))
+        {
+            projectilePool.Release(projectile);
+            activeProjectiles.Remove(projectile);
+        }
     }
 
     private void ProjectileHit_OnAnyProjectileHit(object sender, GameObject projectile)
     {
-        projectilePool.Release(projectile);
+        if (activeProjectiles.Contains(projectile))
+        {
+            projectilePool.Release(projectile);
+            activeProjectiles.Remove(projectile);
+        }
     }
 
     private void GameInputSystem_OnPlayerShooter(object sender, EventArgs e)
     {
-        ProjectileMovement projectileMovement = projectilePool.Get().GetComponent<ProjectileMovement>();
+        GameObject projectile = projectilePool.Get();
+        activeProjectiles.Add(projectile);
+        ProjectileMovement projectileMovement = projectile.GetComponent<ProjectileMovement>();
         projectileMovement.SetProjectileMovement(offset.up, offset.position, offset.rotation);
     }
 }

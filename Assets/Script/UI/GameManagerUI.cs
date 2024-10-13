@@ -8,9 +8,11 @@ public class GameManagerUI : MonoBehaviour
 {
     [SerializeField] private GameOverUI gameOverUI;
     [SerializeField] private GamePauseUI gamePauseUI;
+    [SerializeField] private GameSettingUI gameSettingUI;
     public static GameManagerUI Instance;
     public event EventHandler OnGameOverUI;
     public event EventHandler OnGamePauseUI;
+    public event EventHandler OnGameSettingUI;
     public event EventHandler OnGameManagerUnPauseGame;
     private void Awake()
     {
@@ -22,6 +24,12 @@ public class GameManagerUI : MonoBehaviour
         gamePauseUI.UnPauseGame += GamePauseUI_UnPauseGame;
         gamePauseUI.SettingGame += GamePauseUI_SettingGame;
         gamePauseUI.OnClickGamePauseBtn += GamePauseUI_OnClickGamePauseBtn;
+        gameSettingUI.OnCallGamePauseUI += GameSettingUI_OnCallGamePauseUI;
+    }
+
+    private void GameSettingUI_OnCallGamePauseUI(object sender, EventArgs e)
+    {
+        OnGamePauseUI?.Invoke(this, EventArgs.Empty);
     }
 
     private void GamePauseUI_OnClickGamePauseBtn(object sender, EventArgs e)
@@ -31,7 +39,7 @@ public class GameManagerUI : MonoBehaviour
 
     private void GamePauseUI_SettingGame(object sender, EventArgs e)
     {
-        throw new NotImplementedException();
+        OnGameSettingUI?.Invoke(this, EventArgs.Empty);
     }
 
     private void GamePauseUI_UnPauseGame(object sender, EventArgs e)

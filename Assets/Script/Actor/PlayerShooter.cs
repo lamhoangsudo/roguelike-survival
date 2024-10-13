@@ -27,12 +27,6 @@ public class PlayerShooter : MonoBehaviour
 
     private void Start()
     {
-        // Unsubscribe to avoid multiple subscriptions
-        //GameInputSystem.instance.OnPlayerShooter -= GameInputSystem_OnPlayerShooter;
-        //ProjectileHit.OnAnyProjectileHit -= ProjectileHit_OnAnyProjectileHit;
-        //Projectile.OnAnyProjectileRunOutExistenceTime -= Projectile_OnAnyProjectileRunOutExistenceTime;
-
-        // Subscribe to the events
         GameInputSystem.instance.OnPlayerShooter += GameInputSystem_OnPlayerShooter;
         ProjectileHit.OnAnyProjectileHit += ProjectileHit_OnAnyProjectileHit;
         Projectile.OnAnyProjectileRunOutExistenceTime += Projectile_OnAnyProjectileRunOutExistenceTime;
@@ -53,14 +47,17 @@ public class PlayerShooter : MonoBehaviour
         {
             projectilePool.Release(projectile);
             activeProjectiles.Remove(projectile);
+            SoundManager.Instance.PlaySound(SoundManager.Sound.GunHit);
         }
     }
 
     private void GameInputSystem_OnPlayerShooter(object sender, EventArgs e)
     {
+        if (GameManager.Instance.status == GameManager.GameStatus.Pause || GameManager.Instance.status == GameManager.GameStatus.GameOver) return;
         GameObject projectile = projectilePool.Get();
         activeProjectiles.Add(projectile);
         ProjectileMovement projectileMovement = projectile.GetComponent<ProjectileMovement>();
         projectileMovement.SetProjectileMovement(offset.up, offset.position, offset.rotation);
+        SoundManager.Instance.PlaySound(SoundManager.Sound.GunShoot);
     }
 }

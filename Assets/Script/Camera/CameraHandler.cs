@@ -8,11 +8,11 @@ public class CameraHandler : MonoBehaviour
 {
     public static CameraHandler Instance;
     [SerializeField] private CinemachineVirtualCamera cameraHandler;
+    [SerializeField] private Camera minimap;
     [SerializeField] private float zoomAmount;
     [SerializeField] private float zoomSpeed;
     [SerializeField] float maxZoom = 30f;
     [SerializeField] float minZoom = 10f;
-    private float edgeScrolling;
     private float orthographicSize;
     private float targetOrthographicSize;
     private void Awake()
@@ -23,11 +23,9 @@ public class CameraHandler : MonoBehaviour
     {
         orthographicSize = cameraHandler.m_Lens.OrthographicSize;
         targetOrthographicSize = orthographicSize;
-        edgeScrolling = 20f;
     }
     private void Update()
     {
-        //HandlerMovement();
         HandLerZoom();
     }
     private void HandLerZoom()
@@ -36,6 +34,6 @@ public class CameraHandler : MonoBehaviour
         targetOrthographicSize = Mathf.Clamp(targetOrthographicSize, minZoom, maxZoom);
         orthographicSize = Mathf.Lerp(orthographicSize, targetOrthographicSize, Time.deltaTime * zoomSpeed);
         cameraHandler.m_Lens.OrthographicSize = orthographicSize;
-        //minimap.orthographicSize = orthographicSize * 4f;
+        minimap.orthographicSize = orthographicSize * 4f;
     }
 }

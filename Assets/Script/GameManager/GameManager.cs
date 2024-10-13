@@ -12,15 +12,18 @@ public class GameManager : MonoBehaviour
     public enum GameStatus
     {
         Pause,
-        UnPause,
+        Play,
         GameOver
     }
+    public GameStatus status {  get; private set; }
     private void Awake()
     {
         if (Instance == null) Instance = this;
     }
     private void Start()
     {
+        status = GameStatus.Play;
+        HandlerGameStatus(GameStatus.Play);
         Player.OnPlayerDie += Player_OnPlayerDie;
         GameManagerUI.Instance.OnGamePauseUI += GameManagerUI_OnGamePause;
         GameManagerUI.Instance.OnGameManagerUnPauseGame += Instance_OnGameManagerUnPauseGame;
@@ -28,7 +31,7 @@ public class GameManager : MonoBehaviour
 
     private void Instance_OnGameManagerUnPauseGame(object sender, EventArgs e)
     {
-        HandlerGameStatus(GameStatus.UnPause);
+        HandlerGameStatus(GameStatus.Play);
     }
 
     private void GameManagerUI_OnGamePause(object sender, EventArgs e)
@@ -42,13 +45,14 @@ public class GameManager : MonoBehaviour
     }
     private void HandlerGameStatus(GameStatus gameStatus)
     {
+        status = gameStatus;
         switch (gameStatus)
         {
             case GameStatus.Pause:
                 OnGamePause?.Invoke(this, EventArgs.Empty);
                 Time.timeScale = 0;
                 break;
-            case GameStatus.UnPause:
+            case GameStatus.Play:
                 Time.timeScale = 1;
                 break;
             case GameStatus.GameOver:

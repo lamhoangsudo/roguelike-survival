@@ -36,6 +36,7 @@ public class Enemy : MonoBehaviour
         heath -= projectileDamage;
         if (heath <= 0)
         {
+            SoundManager.Instance.PlaySound(SoundManager.Sound.EnemyExplosion);
             OnAnyEnemyDie?.Invoke(this, this.gameObject);
         }
     }

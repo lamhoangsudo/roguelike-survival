@@ -6,10 +6,10 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private float moveSpeed;
-    [Range(0, 1)]
+    [Range(0, 1f)]
     [SerializeField] private float moveSpeedMultipleByLevel;
     [SerializeField] private float rotationSpeed;
-    [Range(0, 1)]
+    [Range(0, 1f)]
     [SerializeField] private float rotationSpeedMultipleByLevel;
     [SerializeField] private BoxCollider2D boundingShape;
     [SerializeField] private Transform gun;
@@ -56,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void CalculatorPlayerMovementLevelScale(int level)
     {
-        moveSpeed += moveSpeed * moveSpeedMultipleByLevel * level;
-        rotationSpeed += rotationSpeed * rotationSpeedMultipleByLevel * level;
+        moveSpeed += moveSpeedMultipleByLevel * level;
+        rotationSpeed += rotationSpeedMultipleByLevel * level;
     }
 }

@@ -183,7 +183,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+  moveSpeedMultipleByLevel: 0.189
   rotationSpeed: 5
+  rotationSpeedMultipleByLevel: 0.229
   boundingShape: {fileID: 0}
   gun: {fileID: 6084268578989003903}
 --- !u!114 &5658597764908821459
@@ -204,8 +206,10 @@ MonoBehaviour:
   magazineMax: 10
   magazine: 0
   timeRateOfFireMax: 0.5
+  reduceMutiplyTimeRateOfFireMax: 0.157
   timeRateOfFire: 0
   timeReloadMax: 5
+  reduceMutiplyTimeReloadMax: 0.185
   timeReload: 0
 --- !u!114 &8276127762002106316
 MonoBehaviour:
@@ -221,6 +225,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heath: 0
   heathMax: 100
+  heathMaxMutiplyByLevel: 0.253
+  reduceDamage: 0
+  reduceDamageMutiplyByLevel: 0.245
   layer: 3
   playerPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &4365628816716696373

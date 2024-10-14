@@ -61,4 +61,8 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
+    private void OnDestroy()
+    {
+        Player.OnPlayerDie -= Player_OnPlayerDie;
+    }
 }

@@ -412,6 +412,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 0}
   moveSpeed: 5
+  moveSpeedMutiplyByLevel: 0.189
   enemyRigidbody: {fileID: 161032381933272435}
 --- !u!50 &161032381933272435
 Rigidbody2D:

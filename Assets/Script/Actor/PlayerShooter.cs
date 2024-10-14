@@ -130,8 +130,10 @@ public class PlayerShooter : MonoBehaviour
     }
     private void CalculatorPlayerShooterScale(int level)
     {
-        timeRateOfFireMax -= timeRateOfFireMax * reduceMutiplyTimeRateOfFireMax * level;
-        timeReloadMax -= timeReloadMax * reduceMutiplyTimeReloadMax * level;
+        timeRateOfFireMax -= reduceMutiplyTimeRateOfFireMax * level;
+        timeRateOfFireMax = Mathf.Clamp(timeRateOfFireMax, 0.2f, timeRateOfFireMax);
+        timeReloadMax -= reduceMutiplyTimeReloadMax * level;
+        timeReloadMax = Mathf.Clamp(timeRateOfFireMax, 1f, timeReloadMax);
     }
     private void OnDestroy()
     {

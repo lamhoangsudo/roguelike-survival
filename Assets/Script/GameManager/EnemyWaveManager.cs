@@ -75,8 +75,11 @@ public class EnemyWaveManager : MonoBehaviour
 
     private void Enemy_OnAnyEnemyDie(object sender, GameObject enemy)
     {
-        enemyPool.Release(enemy);
-        activeEnemy.Remove(enemy);
+        if (activeEnemy.Contains(enemy))
+        {
+            activeEnemy.Remove(enemy);
+            enemyPool.Release(enemy);
+        }
         if(activeEnemy.Count == 0)
         {
             if (wave % 2 == 0)
@@ -95,11 +98,15 @@ public class EnemyWaveManager : MonoBehaviour
 
     private void Update()
     {
+        HandlerWaveStatus();
+    }
+    private void HandlerWaveStatus()
+    {
         switch (state)
         {
             case State.PrepareWave:
                 timePrepareToSpawn -= Time.deltaTime;
-                if(timePrepareToSpawn <= 0)
+                if (timePrepareToSpawn <= 0)
                 {
                     SettingNextWave();
                     OnPrepareToSpawn?.Invoke(this, false);
@@ -110,7 +117,7 @@ public class EnemyWaveManager : MonoBehaviour
                 timeWave -= Time.deltaTime;
                 if (timeWave <= 0)
                 {
-                    SettingNextWave();
+                    wave++;
                     if (wave % 2 == 0)
                     {
                         state = State.PrepareWave;
@@ -118,6 +125,7 @@ public class EnemyWaveManager : MonoBehaviour
                     }
                     else
                     {
+                        SettingNextWave();
                         state = State.SpawningWave;
                     }
                 }
@@ -176,7 +184,6 @@ public class EnemyWaveManager : MonoBehaviour
         numberOfEnemiesInWave = numberMaxOfEnemiesInWave;
         timeMaxToWaitSpawnNextEnemy = (timeMaxToWaitSpawnNextWavel * 0.1f) / numberMaxOfEnemiesInWave;
         timeEnemyStartMoving = timeMaxEnemyStartMoving;
-        wave++;
         playOne = true;
         OnNumberWaveChange?.Invoke(this, wave);
     }

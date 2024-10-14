@@ -6,13 +6,23 @@ public class EnemyMovement : MonoBehaviour, IMovement
 {
     public Player player;
     [SerializeField] private float moveSpeed;
+    [Range(0, 1)]
+    [SerializeField] private float moveSpeedMutiplyByLevel;
     [SerializeField] private Rigidbody2D enemyRigidbody;
     private bool isFullWaveEnemyReady;
     private void Start()
     {
+        CalculatorEnemyMovementLevelScale(LevelSystem.instance.level);
         isFullWaveEnemyReady = false;
         EnemyWaveManager.instance.OnFullWaveEnemyReady += EnemyWaveManager_OnFullWaveEnemyReady;
+        LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
     }
+
+    private void LevelSystem_OnLevelChanged(object sender, System.EventArgs e)
+    {
+        CalculatorEnemyMovementLevelScale(LevelSystem.instance.level);
+    }
+
     private void Update()
     {
         if (player == null || !isFullWaveEnemyReady || GameManager.Instance.status == GameManager.GameStatus.GameOver) return;
@@ -37,5 +47,9 @@ public class EnemyMovement : MonoBehaviour, IMovement
     private void EnemyWaveManager_OnFullWaveEnemyReady(object sender, System.EventArgs e)
     {
         isFullWaveEnemyReady = true;
+    }
+    private void CalculatorEnemyMovementLevelScale(int level)
+    {
+        moveSpeed += moveSpeedMutiplyByLevel * level;
     }
 }

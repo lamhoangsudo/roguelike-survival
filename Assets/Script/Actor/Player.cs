@@ -41,7 +41,12 @@ public class Player : MonoBehaviour
         if(heath <= 0)
         {
             OnPlayerDie?.Invoke(this, EventArgs.Empty);
+            CameraShake.Instance.setShake(10f, 0.2f);
             Destroy(gameObject);
+        }
+        else
+        {
+            CameraShake.Instance.setShake(7f, 0.15f);
         }
     }
     public Vector3 GetPlayerPosition()

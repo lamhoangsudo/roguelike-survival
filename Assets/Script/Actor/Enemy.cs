@@ -43,7 +43,12 @@ public class Enemy : MonoBehaviour
         if (heath <= 0)
         {
             SoundManager.Instance.PlaySound(SoundManager.Sound.EnemyExplosion);
+            CameraShake.Instance.setShake(6f, 0.15f);
             OnAnyEnemyDie?.Invoke(this, this.gameObject);
+        }
+        else
+        {
+            CameraShake.Instance.setShake(5f, 0.1f);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
@@ -55,6 +60,7 @@ public class Enemy : MonoBehaviour
         if(collision.gameObject.layer == hitLayer[1])
         {
             EnemyHit(collision.gameObject.GetComponent<Projectile>().GetDamage());
+            CameraShake.Instance.setShake(5f, 0.1f);
         }
     }
     //public float GetMoney() { return money; }

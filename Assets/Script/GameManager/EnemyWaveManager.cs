@@ -50,16 +50,21 @@ public class EnemyWaveManager : MonoBehaviour
         timePrepareToSpawn = timeMaxPrepareToSpawn;
         wave = 0;
         enemyPool = new(
-            createFunc: () => Instantiate(pfEnemy, spawnPositionTransform.position + UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f), Quaternion.identity),
-            actionOnGet: (enemy) => {
-                enemy.SetActive(true);
-                enemy.transform.SetPositionAndRotation(spawnPositionTransform.position + UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f), Quaternion.identity);
+            createFunc: () => Instantiate(pfEnemy, spawnPositionTransform.position + (UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f)), Quaternion.identity),
+            actionOnGet: (enemy) =>
+            { 
+                enemy.GetComponent<Enemy>().ResetEnemy();
+                enemy.SetActive(true); 
             },
-            actionOnRelease: (enemy) => enemy.SetActive(false),
+            actionOnRelease: (enemy) => 
+            {
+                enemy.SetActive(false);
+                enemy.transform.SetPositionAndRotation(spawnPositionTransform.position + (UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f)), Quaternion.identity);
+            },
             actionOnDestroy: (enemy) => Destroy(enemy),
             collectionCheck: true,
             defaultCapacity: 5,
-            maxSize: 10
+            maxSize: 55
             );
         OnPrepareToSpawn?.Invoke(this, true);
     }
@@ -156,12 +161,28 @@ public class EnemyWaveManager : MonoBehaviour
     private void SettingNextWave()
     {
         spawnPositionTransform = listPointSpawns[UnityEngine.Random.Range(0, listPointSpawns.Count)];
-        numberMaxOfEnemiesInWave += mutiplyNumberEnemyWaveIncreases * wave;
+        if (numberMaxOfEnemiesInWave < 55)
+        {
+            if (wave < 5)
+            {
+                numberMaxOfEnemiesInWave += mutiplyNumberEnemyWaveIncreases * wave;
+            }
+            else if (wave % 5 == 0)
+            {
+                numberMaxOfEnemiesInWave += mutiplyNumberEnemyWaveIncreases * wave;
+                numberMaxOfEnemiesInWave = Mathf.Clamp(numberMaxOfEnemiesInWave, 1, 55);
+            }
+        }
         numberOfEnemiesInWave = numberMaxOfEnemiesInWave;
         timeMaxToWaitSpawnNextEnemy = (timeMaxToWaitSpawnNextWavel * 0.1f) / numberMaxOfEnemiesInWave;
         timeEnemyStartMoving = timeMaxEnemyStartMoving;
         wave++;
         playOne = true;
         OnNumberWaveChange?.Invoke(this, wave);
+    }
+    private void OnDestroy()
+    {
+        enemyPool.Clear();
+        Enemy.OnAnyEnemyDie -= Enemy_OnAnyEnemyDie;
     }
 }

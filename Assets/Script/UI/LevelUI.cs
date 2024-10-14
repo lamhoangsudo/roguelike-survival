@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -11,8 +12,8 @@ public class LevelUI : MonoBehaviour
         LevelSystem.instance.OnLevelChanged += Instance_OnLevelChanged;
     }
 
-    private void Instance_OnLevelChanged(object sender, int level)
+    private void Instance_OnLevelChanged(object sender, EventArgs e)
     {
-        levelText.text = "Level: " + level.ToString();
+        levelText.text = "Level: " + LevelSystem.instance.level.ToString();
     }
 }

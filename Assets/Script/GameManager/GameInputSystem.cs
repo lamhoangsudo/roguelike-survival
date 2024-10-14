@@ -45,4 +45,8 @@ public class GameInputSystem : MonoBehaviour
     {
         return camera.ScreenToWorldPoint(worldMousePosition) - playerPosition;
     }
+    public Vector3 GetVectorRotation(Vector3 worldPosition1, Vector3 worldPosition2)
+    {
+        return worldPosition1 - worldPosition2;
+    }
 }

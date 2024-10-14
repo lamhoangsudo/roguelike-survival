@@ -7,8 +7,21 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     [SerializeField] private float damage;
+    [Range(0, 1)]
+    [SerializeField] private float damageMutiplyByLevel;
     [SerializeField] private float ExistenceTime;
     public static event EventHandler<GameObject> OnAnyProjectileRunOutExistenceTime;
+    private void Start()
+    {
+        CalculatorProjectileLevelScale(LevelSystem.instance.level);
+        LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
+    }
+
+    private void LevelSystem_OnLevelChanged(object sender, EventArgs e)
+    {
+        CalculatorProjectileLevelScale(LevelSystem.instance.level);
+    }
+
     private void OnEnable()
     {
         Invoke(nameof(ProjectileRunOutExistenceTime), ExistenceTime);
@@ -28,5 +41,9 @@ public class Projectile : MonoBehaviour
     private void ProjectileRunOutExistenceTime()
     {
         OnAnyProjectileRunOutExistenceTime?.Invoke(this, this.gameObject);
+    }
+    private void CalculatorProjectileLevelScale(int level)
+    {
+        damage += damage * damageMutiplyByLevel * level;
     }
 }

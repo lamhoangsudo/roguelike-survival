@@ -13,5 +13,6 @@ public class ProjectileMovement : MonoBehaviour
         transform.rotation = shootRotation;
         this.moveDirection = moveDirection;
         rigidbodyProjectile.velocity = moveDirection * ProjectileSpeed;
+
     }
 }

@@ -21,15 +21,21 @@ public class Enemy : MonoBehaviour
     [Range(0, 1)]
     [SerializeField] private float heathPointsMultipleByLevel;
     public static event EventHandler<GameObject> OnAnyEnemyDie;
+    public void ResetEnemy()
+    {
+        heath = heathMax;
+        CalculatorEnemyLevelScale(LevelSystem.instance.level);
+    }
     private void Start()
     {
         heath = heathMax;
+        CalculatorEnemyLevelScale(LevelSystem.instance.level);
         LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
     }
 
-    private void LevelSystem_OnLevelChanged(object sender, int level)
+    private void LevelSystem_OnLevelChanged(object sender, EventArgs e)
     {
-        CalculatorEnemyLevelScale(level);
+        CalculatorEnemyLevelScale(LevelSystem.instance.level);
     }
     private void EnemyHit(float projectileDamage)
     {
@@ -55,12 +61,11 @@ public class Enemy : MonoBehaviour
     public float GetDamage() { return damage; }
     public float GetScorePoint() { return scorePoint; }
     public float GetExperiencePoints() { return experiencePoints; }
-    public void CalculatorEnemyLevelScale(int level)
+    private void CalculatorEnemyLevelScale(int level)
     {
         scorePoint += scorePointsMultipleByLevel * scorePoint * level;
         experiencePoints += experiencePointsMultipleByLevel * experiencePoints * level;
         damage += damagePointsMultipleByLevel * damage * level;
         heathMax += heathPointsMultipleByLevel * heathMax * level;
     }
-
 }

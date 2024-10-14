@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Pool;
+using static Cinemachine.DocumentationSortingAttribute;
 
 public class PlayerShooter : MonoBehaviour
 {
@@ -15,8 +16,12 @@ public class PlayerShooter : MonoBehaviour
     [SerializeField] private int magazineMax;
     [SerializeField] private int magazine;
     [SerializeField] private float timeRateOfFireMax;
+    [Range(0, 1)]
+    [SerializeField] private float reduceMutiplyTimeRateOfFireMax;
     [SerializeField] private float timeRateOfFire;
     [SerializeField] private float timeReloadMax;
+    [Range(0, 1)]
+    [SerializeField] private float reduceMutiplyTimeReloadMax;
     [SerializeField] private float timeReload;
     private enum Status
     {
@@ -29,21 +34,36 @@ public class PlayerShooter : MonoBehaviour
         activeProjectiles = new();
         projectilePool = new(
             createFunc: () => Instantiate(projectile, offset.position, offset.rotation),
-            actionOnGet: (projectile) => projectile.SetActive(true),
-            actionOnRelease: (projectile) => projectile.SetActive(false),
+            actionOnGet: (projectile) => {
+                projectile.SetActive(true);
+            },
+            actionOnRelease: (projectile) =>
+            {
+                projectile.SetActive(false); 
+                projectile.transform.SetPositionAndRotation(offset.position, offset.rotation);
+            },
             actionOnDestroy: (projectile) => Destroy(projectile),
             collectionCheck: true,
             defaultCapacity: 5,
-            maxSize: 10
+            maxSize: 50
         );
     }
     private void Start()
     {
         status = Status.Ready;
+        CalculatorPlayerShooterScale(LevelSystem.instance.level);
         magazine = magazineMax;
         ProjectileHit.OnAnyProjectileHit += ProjectileHit_OnAnyProjectileHit;
         Projectile.OnAnyProjectileRunOutExistenceTime += Projectile_OnAnyProjectileRunOutExistenceTime;
+        LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
     }
+
+    private void LevelSystem_OnLevelChanged(object sender, EventArgs e)
+    {
+        CalculatorPlayerShooterScale(LevelSystem.instance.level);
+        magazineMax++;
+    }
+
     private void Update()
     {
         Shoot();
@@ -107,5 +127,15 @@ public class PlayerShooter : MonoBehaviour
                 status = Status.Ready;
                 break;
         }
+    }
+    private void CalculatorPlayerShooterScale(int level)
+    {
+        timeRateOfFireMax -= timeRateOfFireMax * reduceMutiplyTimeRateOfFireMax * level;
+        timeReloadMax -= timeReloadMax * reduceMutiplyTimeReloadMax * level;
+    }
+    private void OnDestroy()
+    {
+        projectilePool.Clear();
+        Projectile.OnAnyProjectileRunOutExistenceTime -= Projectile_OnAnyProjectileRunOutExistenceTime;
     }
 }

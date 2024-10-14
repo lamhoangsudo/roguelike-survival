@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class LevelSystem : MonoBehaviour
 {
-    [SerializeField] private int level;
+    public int level { get; private set; }
     [SerializeField] private int levelMax;
     [SerializeField] private float experiencePoints;
     [SerializeField] private float experiencePointsMax;
     [Range(0, 1)]
     [SerializeField] private float experiencePointsMultipleByLevel;
     public static LevelSystem instance;
-    public event EventHandler<int> OnLevelChanged;
+    public event EventHandler OnLevelChanged;
     private void Awake()
     {
         if (instance == null) instance = this; 
@@ -42,7 +42,11 @@ public class LevelSystem : MonoBehaviour
             level += 1;
             CaculaterexperiencePointsMax();
             experiencePoints = 0;
-            OnLevelChanged?.Invoke(this, level);
+            OnLevelChanged?.Invoke(this, EventArgs.Empty);
         }
+    }
+    private void OnDestroy()
+    {
+        Enemy.OnAnyEnemyDie -= Enemy_OnAnyEnemyDie;
     }
 }

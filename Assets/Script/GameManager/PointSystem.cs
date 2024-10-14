@@ -22,4 +22,8 @@ public class PointSystem : MonoBehaviour
         playerPoint += enemyDead.GetComponent<Enemy>().GetScorePoint();
         OnPlayerPointChange?.Invoke(this, playerPoint);
     }
+    private void OnDestroy()
+    {
+        Enemy.OnAnyEnemyDie -= Enemy_OnAnyEnemyDie;
+    }
 }

@@ -9,10 +9,15 @@ public class EnemyMovement : MonoBehaviour, IMovement
     [Range(0, 1)]
     [SerializeField] private float moveSpeedMutiplyByLevel;
     [SerializeField] private Rigidbody2D enemyRigidbody;
+    [SerializeField] private Transform enemyVisual;
+    private float moveSpeed0;
     private bool isFullWaveEnemyReady;
-    private void Start()
+    private void Awake()
     {
         CalculatorEnemyMovementLevelScale(LevelSystem.instance.level);
+    }
+    private void Start()
+    {
         isFullWaveEnemyReady = false;
         EnemyWaveManager.instance.OnFullWaveEnemyReady += EnemyWaveManager_OnFullWaveEnemyReady;
         LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
@@ -32,7 +37,7 @@ public class EnemyMovement : MonoBehaviour, IMovement
     public void Move(Vector3 movePosition)
     {
         Vector3 moveDir = (movePosition - this.transform.position).normalized;
-        GetComponent<Rigidbody2D>().velocity = moveSpeed * moveDir;
+        GetComponent<Rigidbody2D>().velocity = moveSpeed0 * moveDir;
         EnemyWaveManager.instance.OnFullWaveEnemyReady += EnemyWaveManager_OnFullWaveEnemyReady;
     }
     private void Rotation(Vector3 rotationPosition)
@@ -41,7 +46,7 @@ public class EnemyMovement : MonoBehaviour, IMovement
         if (rotationDirection != Vector2.zero)
         {
             float angle = Mathf.Atan2(rotationDirection.y, rotationDirection.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, 0, angle - 90), Time.deltaTime * 10f);
+            enemyVisual.rotation = Quaternion.Lerp(enemyVisual.rotation, Quaternion.Euler(0, 0, angle - 90), Time.deltaTime * 10f);
         }
     }
     private void EnemyWaveManager_OnFullWaveEnemyReady(object sender, System.EventArgs e)
@@ -50,6 +55,6 @@ public class EnemyMovement : MonoBehaviour, IMovement
     }
     private void CalculatorEnemyMovementLevelScale(int level)
     {
-        moveSpeed += moveSpeedMutiplyByLevel * level;
+        moveSpeed0 = moveSpeed + moveSpeed * moveSpeedMutiplyByLevel * level;
     }
 }

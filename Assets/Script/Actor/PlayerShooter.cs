@@ -23,6 +23,10 @@ public class PlayerShooter : MonoBehaviour
     [Range(0, 1)]
     [SerializeField] private float reduceMutiplyTimeReloadMax;
     [SerializeField] private float timeReload;
+    [SerializeField] private Animator reloadText;
+    private float timeRateOfFireMax0;
+    private float timeReloadMax0;
+
     private enum Status
     {
         Ready,
@@ -31,6 +35,7 @@ public class PlayerShooter : MonoBehaviour
     }
     private void Awake()
     {
+        CalculatorPlayerShooterScale(LevelSystem.instance.level);
         activeProjectiles = new();
         projectilePool = new(
             createFunc: () => Instantiate(projectile, offset.position, offset.rotation),
@@ -51,7 +56,6 @@ public class PlayerShooter : MonoBehaviour
     private void Start()
     {
         status = Status.Ready;
-        CalculatorPlayerShooterScale(LevelSystem.instance.level);
         magazine = magazineMax;
         ProjectileHit.OnAnyProjectileHit += ProjectileHit_OnAnyProjectileHit;
         Projectile.OnAnyProjectileRunOutExistenceTime += Projectile_OnAnyProjectileRunOutExistenceTime;
@@ -93,7 +97,7 @@ public class PlayerShooter : MonoBehaviour
         if (status != Status.Ready) return;
         if (!GameInputSystem.instance.isShoot) return;
         status = Status.Shoot;
-        timeRateOfFire = timeRateOfFireMax;
+        timeRateOfFire = timeRateOfFireMax0;
         magazine -= 1;
         GameObject projectile = projectilePool.Get();
         activeProjectiles.Add(projectile);
@@ -106,13 +110,14 @@ public class PlayerShooter : MonoBehaviour
         switch(status)
         {
             case Status.Ready:
+                reloadText.gameObject.SetActive(false);
                 break;
                 case Status.Shoot:
                 timeRateOfFire -= Time.deltaTime;
                 if (timeRateOfFire > 0) return;
                 if(magazine <= 0)
                 {
-                    timeReload = timeReloadMax;
+                    timeReload = timeReloadMax0;
                     status = Status.Reload;
                 }
                 else
@@ -121,6 +126,7 @@ public class PlayerShooter : MonoBehaviour
                 }
                 break;
             case Status.Reload:
+                reloadText.gameObject.SetActive(true);
                 timeReload -= Time.deltaTime;
                 if (timeReload > 0) return;
                 magazine = magazineMax;
@@ -130,10 +136,10 @@ public class PlayerShooter : MonoBehaviour
     }
     private void CalculatorPlayerShooterScale(int level)
     {
-        timeRateOfFireMax -= reduceMutiplyTimeRateOfFireMax * level;
-        timeRateOfFireMax = Mathf.Clamp(timeRateOfFireMax, 0.2f, timeRateOfFireMax);
-        timeReloadMax -= reduceMutiplyTimeReloadMax * level;
-        timeReloadMax = Mathf.Clamp(timeRateOfFireMax, 1f, timeReloadMax);
+        timeRateOfFireMax0 -= timeRateOfFireMax - timeRateOfFireMax * reduceMutiplyTimeRateOfFireMax * level;
+        timeRateOfFireMax0 = Mathf.Clamp(timeRateOfFireMax, 0.2f, timeRateOfFireMax);
+        timeReloadMax0 = timeReloadMax - timeReloadMax * reduceMutiplyTimeReloadMax * level;
+        timeReloadMax0 = Mathf.Clamp(timeRateOfFireMax, 1f, timeReloadMax);
     }
     private void OnDestroy()
     {

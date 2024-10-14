@@ -10,10 +10,15 @@ public class Projectile : MonoBehaviour
     [Range(0, 1)]
     [SerializeField] private float damageMutiplyByLevel;
     [SerializeField] private float ExistenceTime;
+    private float damage0;
+
     public static event EventHandler<GameObject> OnAnyProjectileRunOutExistenceTime;
-    private void Start()
+    private void Awake()
     {
         CalculatorProjectileLevelScale(LevelSystem.instance.level);
+    }
+    private void Start()
+    {
         LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
     }
 
@@ -36,7 +41,7 @@ public class Projectile : MonoBehaviour
     }
     public float GetDamage()
     {
-        return damage;
+        return damage0;
     }
     private void ProjectileRunOutExistenceTime()
     {
@@ -44,6 +49,6 @@ public class Projectile : MonoBehaviour
     }
     private void CalculatorProjectileLevelScale(int level)
     {
-        damage += damage * damageMutiplyByLevel * level;
+        damage0 = damage + damage * damageMutiplyByLevel * level;
     }
 }

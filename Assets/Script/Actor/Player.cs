@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private float heath;
+    public float heath { get; private set; }
     [SerializeField] private float heathMax;
     [Range(0, 1)]
     [SerializeField] private float heathMaxMutiplyByLevel;
@@ -15,10 +15,16 @@ public class Player : MonoBehaviour
     [SerializeField] private float layer;
     [SerializeField] private Vector3 playerPosition;
     public static event EventHandler OnPlayerDie;
+    public event EventHandler OnPlayerDamage;
+    private float heathMax0;
+    private float reduceDamage0;
+    private void Awake()
+    {
+        CalculatorPlayerLevelScale(LevelSystem.instance.level);
+        heath = heathMax0;
+    }
     private void Start()
     {
-        heath = heathMax;
-        CalculatorPlayerLevelScale(LevelSystem.instance.level);
         LevelSystem.instance.OnLevelChanged += LevelSystem_OnLevelChanged;
     }
 
@@ -36,7 +42,7 @@ public class Player : MonoBehaviour
     }
     private void PlayerHit(float damage)
     {
-        damage -= reduceDamage;
+        damage -= reduceDamage0;
         heath -= damage;
         if(heath <= 0)
         {
@@ -47,6 +53,7 @@ public class Player : MonoBehaviour
         else
         {
             CameraShake.Instance.setShake(7f, 0.15f);
+            OnPlayerDamage?.Invoke(this, EventArgs.Empty);
         }
     }
     public Vector3 GetPlayerPosition()
@@ -56,7 +63,15 @@ public class Player : MonoBehaviour
     }
     private void CalculatorPlayerLevelScale(int level)
     {
-        heathMax += heathMax * heathMaxMutiplyByLevel * level;
-        reduceDamage += reduceDamage * reduceDamageMutiplyByLevel * level;
+        heathMax0 = heathMax + heathMax * heathMaxMutiplyByLevel * level;
+        reduceDamage0 = reduceDamage + reduceDamage * reduceDamageMutiplyByLevel * level;
+    }
+    public float GetHeathMax()
+    {
+        return heathMax0;
+    }
+    public float GetHeathNormalize()
+    {
+        return heath / heathMax0;
     }
 }

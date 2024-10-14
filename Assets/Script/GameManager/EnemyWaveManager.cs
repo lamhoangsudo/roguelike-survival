@@ -2,57 +2,66 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
+using UnityEngine.UIElements;
 
 public class EnemyWaveManager : MonoBehaviour
 {
-    [SerializeField] private List<Transform> listPointSpawn;
+    [SerializeField] private List<Transform> listPointSpawns;
     [SerializeField] private GameObject pfEnemy;
     [SerializeField] private Player player;
     public enum State
     {
-        WaitingToSpawnWave,
+        PrepareWave,
+        InWave,
         SpawningWave,
     }
     public static EnemyWaveManager instance;
     [SerializeField] private bool playOne;
     public State state;
     private Transform spawnPositionTransform;
+    private HashSet<GameObject> activeEnemy;
+    [SerializeField] private int numberMaxOfEnemiesInWave;
     [SerializeField] private int numberOfEnemiesInWave;
-    [SerializeField] private float timeToWaitSpawnNextEnemy;
-    [SerializeField] private float timeEnemyStartMoving;
-    [SerializeField] private int numberEnemyWaveIncreases;
+    [SerializeField] private int mutiplyNumberEnemyWaveIncreases;
+    [SerializeField] private float timeMaxToWaitSpawnNextWavel;
     [SerializeField] private float timeMaxEnemyStartMoving;
+    [SerializeField] private float timeEnemyStartMoving;
+    [SerializeField] private float timeMaxToWaitSpawnNextEnemy;
     [SerializeField] private float timeToSpawnEnenmy;
-    [SerializeField] private float timeToWaitSpawnNextWavel;
+    [SerializeField] private float timeMaxPrepareToSpawn;
     public int wave {  get; private set; }
-    public float timeToSpawn { get; private set; }
+    public float timeWave { get; private set; }
+    public float timePrepareToSpawn { get; private set; }
     private ObjectPool<GameObject> enemyPool;
     public event EventHandler<int> OnNumberWaveChange;
+    public event EventHandler<bool> OnPrepareToSpawn;
+    public event EventHandler OnFullWaveEnemyReady;
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
         }
-        numberEnemyWaveIncreases = 2;
-        timeEnemyStartMoving = 1.5f;
-        timeToWaitSpawnNextWavel = 10;
-        state = State.WaitingToSpawnWave;
-        timeToSpawn = 3f;
+        activeEnemy = new HashSet<GameObject>();
+        numberOfEnemiesInWave = numberMaxOfEnemiesInWave;
+        timeEnemyStartMoving = timeWave * 0.5f;
+        state = State.PrepareWave;
+        timeWave = timeMaxToWaitSpawnNextWavel * 0.1f;
+        timePrepareToSpawn = timeMaxPrepareToSpawn;
         wave = 0;
         enemyPool = new(
             createFunc: () => Instantiate(pfEnemy, spawnPositionTransform.position + UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f), Quaternion.identity),
             actionOnGet: (enemy) => {
                 enemy.SetActive(true);
-                enemy.transform.position = spawnPositionTransform.position + UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f);
-                enemy.transform.rotation = Quaternion.identity;
-                },
+                enemy.transform.SetPositionAndRotation(spawnPositionTransform.position + UtilClass.GetRamdomVector() * UnityEngine.Random.Range(0f, 10f), Quaternion.identity);
+            },
             actionOnRelease: (enemy) => enemy.SetActive(false),
             actionOnDestroy: (enemy) => Destroy(enemy),
             collectionCheck: true,
             defaultCapacity: 5,
             maxSize: 10
             );
+        OnPrepareToSpawn?.Invoke(this, true);
     }
     private void Start()
     {
@@ -62,17 +71,50 @@ public class EnemyWaveManager : MonoBehaviour
     private void Enemy_OnAnyEnemyDie(object sender, GameObject enemy)
     {
         enemyPool.Release(enemy);
+        activeEnemy.Remove(enemy);
+        if(activeEnemy.Count == 0)
+        {
+            if (wave % 2 == 0)
+            {
+                timePrepareToSpawn = timeMaxPrepareToSpawn;
+                OnPrepareToSpawn?.Invoke(this, true);
+                state = State.PrepareWave;
+            }
+            else
+            {
+                SettingNextWave();
+                state = State.SpawningWave;
+            }
+        }
     }
 
     private void Update()
     {
         switch (state)
         {
-            case State.WaitingToSpawnWave:
-                timeToSpawn -= Time.deltaTime;
-                if (timeToSpawn <= 0)
+            case State.PrepareWave:
+                timePrepareToSpawn -= Time.deltaTime;
+                if(timePrepareToSpawn <= 0)
                 {
-                    SpawnEnemy(listPointSpawn, 3f, 10);
+                    SettingNextWave();
+                    OnPrepareToSpawn?.Invoke(this, false);
+                    state = State.SpawningWave;
+                }
+                break;
+            case State.InWave:
+                timeWave -= Time.deltaTime;
+                if (timeWave <= 0)
+                {
+                    SettingNextWave();
+                    if (wave % 2 == 0)
+                    {
+                        state = State.PrepareWave;
+                        OnPrepareToSpawn?.Invoke(this, true);
+                    }
+                    else
+                    {
+                        state = State.SpawningWave;
+                    }
                 }
                 break;
             case State.SpawningWave:
@@ -81,8 +123,9 @@ public class EnemyWaveManager : MonoBehaviour
                 {
                     if (timeToSpawnEnenmy <= 0)
                     {
-                        timeToSpawnEnenmy = timeToWaitSpawnNextEnemy;
+                        timeToSpawnEnenmy = timeMaxToWaitSpawnNextEnemy;
                         EnemyMovement enemyMovement = enemyPool.Get().GetComponent<EnemyMovement>();
+                        activeEnemy.Add(enemyMovement.gameObject);
                         if (enemyMovement.player == null)
                         {
                             enemyMovement.player = player;
@@ -92,32 +135,33 @@ public class EnemyWaveManager : MonoBehaviour
                 }
                 else
                 {
-                    timeToSpawn = timeToWaitSpawnNextWavel;
+                    timeWave = timeMaxToWaitSpawnNextWavel;
                     timeEnemyStartMoving -= Time.deltaTime;
                     if (playOne)
                     {
-                        //SoundManager.Instance.PlaySound(SoundManager.Sound.EnemyWaveStarting);
                         playOne = false;
                     }
                     if (timeEnemyStartMoving <= 0)
                     {
+                        timeMaxEnemyStartMoving = timeMaxToWaitSpawnNextWavel * 0.1f;
                         timeEnemyStartMoving = timeMaxEnemyStartMoving;
-                        //OnFullEnemyWaveReady?.Invoke(this, EventArgs.Empty);
-                        state = State.WaitingToSpawnWave;
+                        timePrepareToSpawn = timeMaxPrepareToSpawn;
+                        OnFullWaveEnemyReady?.Invoke(this, EventArgs.Empty);
+                        state = State.InWave;
                     }
                 }
                 break;
         }
     }
-    private void SpawnEnemy(List<Transform> spawnPositionTransform, float timeTotalToSpawnAllEnemy, int numberOfEnemiesInWave)
+    private void SettingNextWave()
     {
-        this.spawnPositionTransform = spawnPositionTransform[UnityEngine.Random.Range(0, spawnPositionTransform.Count)];
-        this.numberOfEnemiesInWave = numberOfEnemiesInWave + numberEnemyWaveIncreases * wave;
-        this.timeToWaitSpawnNextEnemy = timeTotalToSpawnAllEnemy / numberOfEnemiesInWave;
+        spawnPositionTransform = listPointSpawns[UnityEngine.Random.Range(0, listPointSpawns.Count)];
+        numberMaxOfEnemiesInWave += mutiplyNumberEnemyWaveIncreases * wave;
+        numberOfEnemiesInWave = numberMaxOfEnemiesInWave;
+        timeMaxToWaitSpawnNextEnemy = (timeMaxToWaitSpawnNextWavel * 0.1f) / numberMaxOfEnemiesInWave;
         timeEnemyStartMoving = timeMaxEnemyStartMoving;
         wave++;
         playOne = true;
-        state = State.SpawningWave;
         OnNumberWaveChange?.Invoke(this, wave);
     }
 }

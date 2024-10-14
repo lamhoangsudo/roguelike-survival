@@ -7,7 +7,7 @@ public class GameInputSystem : MonoBehaviour
 {
     public static GameInputSystem instance;
     private PlayerInput inputActions;
-    public event EventHandler OnPlayerShooter;
+    public bool isShoot {  get; private set; }
     private void Awake()
     {
         if (instance == null) 
@@ -20,11 +20,17 @@ public class GameInputSystem : MonoBehaviour
         inputActions.Player.Enable();
 
         inputActions.Player.PlayerShoot.performed += PlayerShoot_performed;
+        inputActions.Player.PlayerShoot.canceled += PlayerShoot_canceled;
+    }
+
+    private void PlayerShoot_canceled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
+    {
+        isShoot = false;
     }
 
     private void PlayerShoot_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
     {
-        OnPlayerShooter?.Invoke(this, EventArgs.Empty);
+        isShoot = true;
     }
 
     private void OnDestroy()

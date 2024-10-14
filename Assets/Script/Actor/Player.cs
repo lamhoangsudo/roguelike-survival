@@ -13,7 +13,6 @@ public class Player : MonoBehaviour
     [Range(0, 1)]
     [SerializeField] private float reduceDamageMutiplyByLevel;
     [SerializeField] private float layer;
-    [SerializeField] private Vector3 playerPosition;
     public static event EventHandler OnPlayerDie;
     public event EventHandler OnPlayerDamage;
     private float heathMax0;
@@ -58,7 +57,6 @@ public class Player : MonoBehaviour
     }
     public Vector3 GetPlayerPosition()
     {
-        playerPosition = transform.position;
         return transform.position;
     }
     private void CalculatorPlayerLevelScale(int level)

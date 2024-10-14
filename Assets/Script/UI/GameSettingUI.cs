@@ -11,7 +11,7 @@ public class GameSettingUI : MonoBehaviour
     [SerializeField] private Button backBtn;
     [SerializeField] private Button backSoundBtn;
     [SerializeField] private Button soundBtn;
-    [SerializeField] private Button controlBtn;
+    //[SerializeField] private Button controlBtn;
     [SerializeField] private Button soundIncrease;
     [SerializeField] private Button soundDecrease;
     [SerializeField] private TextMeshProUGUI soundVolume;
@@ -34,10 +34,10 @@ public class GameSettingUI : MonoBehaviour
             gameObject.SetActive(false);
             soundSetting.SetActive(true);
         });
-        controlBtn.onClick.AddListener(() =>
-        {
-            gameObject.SetActive(false);
-        });
+        //controlBtn.onClick.AddListener(() =>
+        //{
+        //    gameObject.SetActive(false);
+        //});
         backSoundBtn.onClick.AddListener(() =>
         {
             gameObject.SetActive(true);
